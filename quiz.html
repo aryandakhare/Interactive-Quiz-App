@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz App | ApexPlanet</title>
+    <title>Quiz Challenge | ApexPlanet</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -26,38 +26,74 @@
         }
         .quiz-container {
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             width: 90%;
             max-width: 600px;
             overflow: hidden;
+            transform-style: preserve-3d;
+            animation: flipIn 0.8s ease-out;
+        }
+        @keyframes flipIn {
+            from { opacity: 0; transform: rotateY(90deg); }
+            to { opacity: 1; transform: rotateY(0); }
         }
         .quiz-header {
-            padding: 20px;
+            padding: 25px;
             background: linear-gradient(90deg, #6C63FF, #4DAAF8);
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .quiz-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 6s infinite linear;
+        }
+        @keyframes pulse {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         .quiz-header h2 {
             margin: 0;
             font-size: 1.5rem;
+            position: relative;
         }
-        .timer {
-            background: rgba(255,255,255,0.2);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-weight: bold;
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .progress-bar {
+            width: 150px;
+            height: 10px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: white;
+            border-radius: 5px;
+            transition: width 0.5s ease;
         }
         .quiz-body {
             padding: 30px;
         }
         .question {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: 500;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             color: var(--dark);
+            min-height: 80px;
         }
         .options {
             display: grid;
@@ -68,21 +104,41 @@
         .option {
             background: #F7FAFC;
             border: 2px solid #E2E8F0;
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 15px;
             cursor: pointer;
             transition: all 0.3s;
             font-weight: 500;
             color: #4A5568;
+            position: relative;
+            overflow: hidden;
+        }
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--primary);
+            transition: all 0.3s;
+            opacity: 0;
         }
         .option:hover {
             background: #EDF2F7;
             border-color: #CBD5E0;
         }
+        .option:hover::before {
+            opacity: 1;
+        }
         .option.selected {
             background: var(--primary);
             color: white;
             border-color: var(--primary);
+        }
+        .option.selected::before {
+            opacity: 1;
+            width: 10px;
         }
         .option.correct {
             background: var(--correct);
@@ -107,38 +163,55 @@
             cursor: pointer;
             font-weight: 500;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         button:disabled {
             background: #CBD5E0;
             cursor: not-allowed;
         }
         button:hover:not(:disabled) {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
         }
         .result {
             text-align: center;
-            padding: 30px;
+            padding: 40px 30px;
             display: none;
         }
         .result h3 {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
+            font-size: 2rem;
+            margin-bottom: 15px;
             color: var(--primary);
         }
         .score {
             font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        .badge {
+            font-size: 5rem;
             margin-bottom: 20px;
+            color: var(--primary);
+            animation: bounce 1s infinite alternate;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-20px); }
         }
         .restart-btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 12px 30px;
+            padding: 15px 30px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1rem;
             margin-top: 20px;
+            transition: all 0.3s;
+        }
+        .restart-btn:hover {
+            transform: scale(1.05);
         }
         footer {
             text-align: center;
@@ -147,21 +220,18 @@
             color: #718096;
             font-size: 14px;
         }
-        @media (max-width: 480px) {
-            .quiz-body {
-                padding: 20px;
-            }
-            .question {
-                font-size: 1rem;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="quiz-container">
         <div class="quiz-header">
-            <h2><i class="fas fa-question-circle"></i> ApexPlanet Quiz</h2>
-            <div class="timer" id="timer">30s</div>
+            <h2><i class="fas fa-trophy"></i> Quiz Challenge</h2>
+            <div class="progress-container">
+                <span id="progressText">1/5</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 20%"></div>
+                </div>
+            </div>
         </div>
         
         <div class="quiz-body">
@@ -174,6 +244,7 @@
         </div>
         
         <div class="result" id="result">
+            <div class="badge"><i class="fas fa-medal"></i></div>
             <h3>Quiz Completed!</h3>
             <div class="score" id="score"></div>
             <button class="restart-btn" id="restartBtn"><i class="fas fa-redo"></i> Restart Quiz</button>
@@ -189,7 +260,8 @@
             {
                 question: "Which language runs in a web browser?",
                 options: ["Java", "C", "Python", "JavaScript"],
-                answer: "JavaScript"
+                answer: "JavaScript",
+                explanation: "JavaScript is the programming language of the Web."
             },
             {
                 question: "What does CSS stand for?",
@@ -199,7 +271,8 @@
                     "Cascading Simple Sheets",
                     "Cars SUVs Sailboats"
                 ],
-                answer: "Cascading Style Sheets"
+                answer: "Cascading Style Sheets",
+                explanation: "CSS stands for Cascading Style Sheets, used for styling web pages."
             },
             {
                 question: "What does HTML stand for?",
@@ -209,20 +282,26 @@
                     "Hypertext Modeling Language",
                     "Hyper Transfer Markup Language"
                 ],
-                answer: "Hypertext Markup Language"
+                answer: "Hypertext Markup Language",
+                explanation: "HTML is the standard markup language for creating web pages."
             },
             {
                 question: "Which of these is NOT a JavaScript framework?",
                 options: ["React", "Angular", "Laravel", "Vue"],
-                answer: "Laravel"
+                answer: "Laravel",
+                explanation: "Laravel is a PHP framework, not a JavaScript framework."
+            },
+            {
+                question: "What year was JavaScript created?",
+                options: ["1990", "1995", "2000", "2005"],
+                answer: "1995",
+                explanation: "JavaScript was created by Brendan Eich in 1995 while working at Netscape."
             }
         ];
 
         let currentQuestion = 0;
         let score = 0;
         let selectedOption = null;
-        let timeLeft = 30;
-        let timer;
 
         const questionEl = document.getElementById('question');
         const optionsEl = document.getElementById('options');
@@ -231,28 +310,10 @@
         const resultEl = document.getElementById('result');
         const scoreEl = document.getElementById('score');
         const restartBtn = document.getElementById('restartBtn');
-        const timerEl = document.getElementById('timer');
-
-        function startTimer() {
-            clearInterval(timer);
-            timeLeft = 30;
-            timerEl.textContent = `${timeLeft}s`;
-            
-            timer = setInterval(() => {
-                timeLeft--;
-                timerEl.textContent = `${timeLeft}s`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    nextQuestion();
-                }
-            }, 1000);
-        }
+        const progressText = document.getElementById('progressText');
+        const progressFill = document.getElementById('progressFill');
 
         function loadQuestion() {
-            clearInterval(timer);
-            startTimer();
-            
             const q = questions[currentQuestion];
             questionEl.textContent = q.question;
             
@@ -265,6 +326,7 @@
                 optionsEl.appendChild(optionEl);
             });
             
+            updateProgress();
             updateButtons();
         }
 
@@ -277,6 +339,12 @@
             // Add selected class to clicked option
             optionEl.classList.add('selected');
             selectedOption = option;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            progressFill.style.width = `${progress}%`;
+            progressText.textContent = `${currentQuestion + 1}/${questions.length}`;
         }
 
         function updateButtons() {
@@ -320,10 +388,21 @@
         }
 
         function showResult() {
-            clearInterval(timer);
             document.querySelector('.quiz-body').style.display = 'none';
             resultEl.style.display = 'block';
-            scoreEl.textContent = `You scored ${score} out of ${questions.length}!`;
+            
+            let message;
+            const percentage = (score / questions.length) * 100;
+            
+            if (percentage >= 80) {
+                message = `Excellent! You scored ${score} out of ${questions.length}! 🎉`;
+            } else if (percentage >= 60) {
+                message = `Good job! You scored ${score} out of ${questions.length}! 👍`;
+            } else {
+                message = `You scored ${score} out of ${questions.length}. Keep practicing! 💪`;
+            }
+            
+            scoreEl.innerHTML = message;
         }
 
         function restartQuiz() {
