@@ -3,116 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz App</title>
+    <title>Quiz App | ApexPlanet</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #6C63FF;
+            --correct: #4CAF50;
+            --wrong: #FF6584;
+            --dark: #2D3748;
+        }
+        * {
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f0f2f5;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
         }
         .quiz-container {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            width: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 90%;
             max-width: 600px;
+            overflow: hidden;
+        }
+        .quiz-header {
+            padding: 20px;
+            background: linear-gradient(90deg, #6C63FF, #4DAAF8);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .quiz-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .timer {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .quiz-body {
             padding: 30px;
         }
         .question {
             font-size: 1.2rem;
+            font-weight: 500;
             margin-bottom: 20px;
-            font-weight: 600;
-            color: #2c3e50;
+            color: var(--dark);
         }
         .options {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 30px;
         }
         .option {
-            background-color: #ecf0f1;
-            border: 2px solid #bdc3c7;
-            border-radius: 5px;
-            padding: 10px 15px;
+            background: #F7FAFC;
+            border: 2px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 15px;
             cursor: pointer;
             transition: all 0.3s;
+            font-weight: 500;
+            color: #4A5568;
         }
         .option:hover {
-            background-color: #3498db;
-            color: white;
-            border-color: #3498db;
+            background: #EDF2F7;
+            border-color: #CBD5E0;
         }
         .option.selected {
-            background-color: #2ecc71;
+            background: var(--primary);
             color: white;
-            border-color: #2ecc71;
+            border-color: var(--primary);
+        }
+        .option.correct {
+            background: var(--correct);
+            color: white;
+            border-color: var(--correct);
+        }
+        .option.wrong {
+            background: var(--wrong);
+            color: white;
+            border-color: var(--wrong);
         }
         .controls {
             display: flex;
             justify-content: space-between;
         }
         button {
-            background-color: #3498db;
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 25px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
         }
         button:disabled {
-            background-color: #bdc3c7;
+            background: #CBD5E0;
             cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
         }
         .result {
             text-align: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-top: 20px;
+            padding: 30px;
             display: none;
         }
-        .progress {
-            height: 5px;
-            background-color: #ecf0f1;
-            margin-bottom: 20px;
-            border-radius: 5px;
+        .result h3 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: var(--primary);
         }
-        .progress-bar {
-            height: 100%;
-            background-color: #2ecc71;
-            border-radius: 5px;
-            width: 0%;
-            transition: width 0.3s;
+        .score {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        .restart-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #F7FAFC;
+            color: #718096;
+            font-size: 14px;
+        }
+        @media (max-width: 480px) {
+            .quiz-body {
+                padding: 20px;
+            }
+            .question {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="quiz-container">
-        <div class="progress">
-            <div class="progress-bar" id="progress"></div>
+        <div class="quiz-header">
+            <h2><i class="fas fa-question-circle"></i> ApexPlanet Quiz</h2>
+            <div class="timer" id="timer">30s</div>
         </div>
-        <div class="question" id="question"></div>
-        <div class="options" id="options"></div>
-        <div class="controls">
-            <button id="prevBtn" disabled>Previous</button>
-            <button id="nextBtn">Next</button>
+        
+        <div class="quiz-body">
+            <div class="question" id="question"></div>
+            <div class="options" id="options"></div>
+            <div class="controls">
+                <button id="prevBtn" disabled><i class="fas fa-arrow-left"></i> Previous</button>
+                <button id="nextBtn">Next <i class="fas fa-arrow-right"></i></button>
+            </div>
         </div>
-        <div class="result" id="result"></div>
+        
+        <div class="result" id="result">
+            <h3>Quiz Completed!</h3>
+            <div class="score" id="score"></div>
+            <button class="restart-btn" id="restartBtn"><i class="fas fa-redo"></i> Restart Quiz</button>
+        </div>
+        
+        <footer>
+            Developed by <strong>Aryan Dakhare</strong> as a Web Development Intern at ApexPlanet
+        </footer>
     </div>
 
     <script>
         const questions = [
-            {
-                question: "What is the capital of France?",
-                options: ["London", "Berlin", "Paris", "Madrid"],
-                answer: "Paris"
-            },
             {
                 question: "Which language runs in a web browser?",
                 options: ["Java", "C", "Python", "JavaScript"],
@@ -127,21 +200,59 @@
                     "Cars SUVs Sailboats"
                 ],
                 answer: "Cascading Style Sheets"
+            },
+            {
+                question: "What does HTML stand for?",
+                options: [
+                    "Hypertext Markup Language",
+                    "Hypertext Machine Language",
+                    "Hypertext Modeling Language",
+                    "Hyper Transfer Markup Language"
+                ],
+                answer: "Hypertext Markup Language"
+            },
+            {
+                question: "Which of these is NOT a JavaScript framework?",
+                options: ["React", "Angular", "Laravel", "Vue"],
+                answer: "Laravel"
             }
         ];
 
         let currentQuestion = 0;
         let score = 0;
         let selectedOption = null;
+        let timeLeft = 30;
+        let timer;
 
         const questionEl = document.getElementById('question');
         const optionsEl = document.getElementById('options');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
         const resultEl = document.getElementById('result');
-        const progressBar = document.getElementById('progress');
+        const scoreEl = document.getElementById('score');
+        const restartBtn = document.getElementById('restartBtn');
+        const timerEl = document.getElementById('timer');
+
+        function startTimer() {
+            clearInterval(timer);
+            timeLeft = 30;
+            timerEl.textContent = `${timeLeft}s`;
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = `${timeLeft}s`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    nextQuestion();
+                }
+            }, 1000);
+        }
 
         function loadQuestion() {
+            clearInterval(timer);
+            startTimer();
+            
             const q = questions[currentQuestion];
             questionEl.textContent = q.question;
             
@@ -153,8 +264,7 @@
                 optionEl.addEventListener('click', () => selectOption(optionEl, option));
                 optionsEl.appendChild(optionEl);
             });
-
-            updateProgress();
+            
             updateButtons();
         }
 
@@ -163,15 +273,10 @@
             document.querySelectorAll('.option').forEach(el => {
                 el.classList.remove('selected');
             });
-
+            
             // Add selected class to clicked option
             optionEl.classList.add('selected');
             selectedOption = option;
-        }
-
-        function updateProgress() {
-            const progress = ((currentQuestion + 1) / questions.length) * 100;
-            progressBar.style.width = `${progress}%`;
         }
 
         function updateButtons() {
@@ -179,18 +284,24 @@
             nextBtn.textContent = currentQuestion === questions.length - 1 ? "Submit" : "Next";
         }
 
-        prevBtn.addEventListener('click', () => {
-            if (currentQuestion > 0) {
-                currentQuestion--;
-                loadQuestion();
-            }
-        });
-
-        nextBtn.addEventListener('click', () => {
+        function checkAnswer() {
             if (selectedOption === questions[currentQuestion].answer) {
                 score++;
+                document.querySelector('.option.selected').classList.add('correct');
+            } else if (selectedOption) {
+                document.querySelector('.option.selected').classList.add('wrong');
+                // Highlight correct answer
+                document.querySelectorAll('.option').forEach(el => {
+                    if (el.textContent === questions[currentQuestion].answer) {
+                        el.classList.add('correct');
+                    }
+                });
             }
+        }
 
+        function nextQuestion() {
+            checkAnswer();
+            
             if (currentQuestion < questions.length - 1) {
                 currentQuestion++;
                 selectedOption = null;
@@ -198,17 +309,35 @@
             } else {
                 showResult();
             }
-        });
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                selectedOption = null;
+                loadQuestion();
+            }
+        }
 
         function showResult() {
-            questionEl.style.display = 'none';
-            optionsEl.style.display = 'none';
-            prevBtn.style.display = 'none';
-            nextBtn.style.display = 'none';
-            
+            clearInterval(timer);
+            document.querySelector('.quiz-body').style.display = 'none';
             resultEl.style.display = 'block';
-            resultEl.textContent = `You scored ${score} out of ${questions.length}!`;
+            scoreEl.textContent = `You scored ${score} out of ${questions.length}!`;
         }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            selectedOption = null;
+            document.querySelector('.quiz-body').style.display = 'block';
+            resultEl.style.display = 'none';
+            loadQuestion();
+        }
+
+        prevBtn.addEventListener('click', prevQuestion);
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', restartQuiz);
 
         loadQuestion();
     </script>
